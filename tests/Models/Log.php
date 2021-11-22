@@ -14,6 +14,7 @@ class Log extends Model
 
     /**
      * The lists of the projectors.
+     * @todo move this into the projector and renames it $models
      */
     protected array $projectors = [SinglePeriodProjector::class];
 

@@ -14,22 +14,7 @@ return [
     'queue_name' => '',
 
     /*
-     * The fully qualified class name of the projection model.
-     */
-    // 'projection_model' => \Laravelcargo\LaravelCargo\Models\Projection::class,
-
-    /*
      * When enabled, Cargo will delete the projections when the related model is also deleted.
      */
     // 'on_cascade_delete' => false,
-
-    /*
-     * When enabled,
-     */
-    // 'enable_api' => false
-
-    /*
-     * The namespace of the projector class.
-     */
-    // 'projectors_namespace => ''
 ];
