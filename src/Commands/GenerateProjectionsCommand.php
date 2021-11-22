@@ -40,7 +40,6 @@ class GenerateProjectionsCommand extends Command
      */
     public function handle(): void
     {
-
         ray($this->getModels());
         // Get the model provided by the
         // Get all the model with projectors
@@ -61,9 +60,11 @@ class GenerateProjectionsCommand extends Command
             ->map(function ($item) {
                 $path = $item->getRelativePathName();
 
-                return sprintf('\%s%s',
+                return sprintf(
+                    '\%s%s',
                     Container::getInstance()->getNamespace(),
-                    strtr(substr($path, 0, strrpos($path, '.')), '/', '\\'));
+                    strtr(substr($path, 0, strrpos($path, '.')), '/', '\\')
+                );
             })
             ->filter(function ($class) {
                 ray($class);
@@ -72,7 +73,7 @@ class GenerateProjectionsCommand extends Command
                 if (class_exists($class)) {
                     $reflection = new \ReflectionClass($class);
                     $valid = $reflection->isSubclassOf(Model::class) &&
-                        !$reflection->isAbstract();
+                        ! $reflection->isAbstract();
                 }
 
                 return $valid;
