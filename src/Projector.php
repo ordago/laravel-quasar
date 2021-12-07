@@ -13,7 +13,8 @@ class Projector
         protected string $projectionName,
         protected string $period,
         protected string $eventName
-    ) {
+    )
+    {
     }
 
     /**
@@ -21,7 +22,7 @@ class Projector
      */
     public function handle(): void
     {
-        if (! $this->hasCallableMethod()) {
+        if (!$this->hasCallableMethod()) {
             return;
         }
 
@@ -73,7 +74,7 @@ class Projector
     {
         return Projection::firstWhere([
             ['projection_name', $this->projectionName],
-            ['key', $this->hasKey() ? $this->key() : null],
+            ['key', $this->guessKey()],
             ['period', '*'],
             ['start_date', null],
         ]);
@@ -86,7 +87,7 @@ class Projector
     {
         return Projection::firstWhere([
             ['projection_name', $this->projectionName],
-            ['key', $this->hasKey() ? $this->key() : null],
+            ['key', $this->guessKey()],
             ['period', $this->period],
             ['start_date', $this->projectedModel->guessProjectionStartDate($this->period)],
         ]);
@@ -99,7 +100,7 @@ class Projector
     {
         $this->projectedModel->projections()->create([
             'projection_name' => $this->projectionName,
-            'key' => $this->hasKey() ? $this->key() : null,
+            'key' => $this->guessKey(),
             'period' => $this->period,
             'start_date' => $this->projectedModel->guessProjectionStartDate($this->period),
             'content' => $this->mergeProjectedContent((new $this->projectionName())->defaultContent()),
@@ -113,7 +114,7 @@ class Projector
     {
         $this->projectedModel->projections()->create([
             'projection_name' => $this->projectionName,
-            'key' => $this->hasKey() ? $this->key() : null,
+            'key' => $this->guessKey(),
             'period' => '*',
             'start_date' => null,
             'content' => $this->mergeProjectedContent((new $this->projectionName())->defaultContent()),
@@ -128,6 +129,13 @@ class Projector
         $projection->content = $this->mergeProjectedContent($projection->content);
 
         $projection->save();
+    }
+
+    private function guessKey(): null|string
+    {
+        return $this->hasKey() ?
+            (string)$this->key() :
+            null;
     }
 
     /**

@@ -43,7 +43,7 @@ class ProjectionCollection extends Collection
     }
 
     /**
-     * Validates and resolve the guess parameters.
+     * Validates and resolves the guess parameters.
      *
      * @throws EmptyProjectionCollectionException|MultipleProjectionsException|MultiplePeriodsException
      */
@@ -57,7 +57,7 @@ class ProjectionCollection extends Collection
     }
 
     /**
-     * Validates and resolve the dates parameters.
+     * Validates and resolves the dates parameters.
      *
      * @throws OverlappingFillBetweenDatesException
      */
