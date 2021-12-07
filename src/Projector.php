@@ -13,8 +13,7 @@ class Projector
         protected string $projectionName,
         protected string $period,
         protected string $eventName
-    )
-    {
+    ) {
     }
 
     /**
@@ -22,7 +21,7 @@ class Projector
      */
     public function handle(): void
     {
-        if (!$this->hasCallableMethod()) {
+        if (! $this->hasCallableMethod()) {
             return;
         }
 
