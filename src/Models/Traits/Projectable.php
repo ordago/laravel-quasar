@@ -38,7 +38,8 @@ trait Projectable
     public function bootProjectors(string $eventName): void
     {
         collect($this->projections)->each(
-            fn(string $projection) => (new Projector($this, $projection, $eventName))->handle()
+            fn(string $projection) => collect((new $projection)->periods)->each(
+                fn(string $period) => (new Projector($this, $projection, $period, $eventName))->handle())
         );
     }
 

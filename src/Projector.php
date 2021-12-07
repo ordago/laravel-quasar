@@ -11,6 +11,7 @@ class Projector
     public function __construct(
         protected Model  $projectedModel,
         protected string $projectionName,
+        protected string $period,
         protected string $eventName
     )
     {
@@ -25,29 +26,20 @@ class Projector
             return;
         }
 
-        $this->parsePeriods();
-    }
+        if ($this->isGlobalPeriod()) {
+            $this->createOrUpdateGlobalPeriod();
+            return;
+        }
 
-    /**
-     * Parses the periods defined as class attribute.
-     */
-    public function parsePeriods(): void
-    {
-        $periods = (new $this->projectionName())->periods;
-
-        collect($periods)->each(function ($period) {
-            $this->isGlobalPeriod($period) ?
-                $this->createOrUpdateGlobalPeriod() :
-                $this->parsePeriod($period);
-        });
+        $this->parsePeriod();
     }
 
     /**
      * Is the given period a global one or not.
      */
-    private function isGlobalPeriod($period): bool
+    private function isGlobalPeriod(): bool
     {
-        return $period === '*';
+        return $this->period === '*';
     }
 
     /**
@@ -65,14 +57,14 @@ class Projector
     /**
      * Parses the given period.
      */
-    private function parsePeriod(string $period): void
+    private function parsePeriod(): void
     {
-        [$quantity, $periodType] = Str::of($period)->split('/[\s]+/');
+        [$quantity, $periodType] = Str::of($this->period)->split('/[\s]+/');
 
-        $projection = $this->findProjection($period, (int)$quantity, $periodType);
+        $projection = $this->findProjection((int)$quantity, $periodType);
 
         is_null($projection) ?
-            $this->createProjection($period, (int)$quantity, $periodType) :
+            $this->createProjection((int)$quantity, $periodType) :
             $this->updateProjection($projection);
     }
 
@@ -92,12 +84,12 @@ class Projector
     /**
      * Finds the projection if it exists.
      */
-    private function findProjection(string $period, int $quantity, string $periodType): Projection|null
+    private function findProjection(int $quantity, string $periodType): Projection|null
     {
         return Projection::firstWhere([
             ['projection_name', $this->projectionName],
             ['key', $this->hasKey() ? $this->key() : null],
-            ['period', $period],
+            ['period', $this->period],
             ['start_date', $this->projectedModel->created_at->floorUnit($periodType, $quantity)],
         ]);
     }
@@ -105,12 +97,12 @@ class Projector
     /**
      * Creates the projection.
      */
-    private function createProjection(string $period, int $quantity, string $periodType): void
+    private function createProjection(int $quantity, string $periodType): void
     {
         $this->projectedModel->projections()->create([
             'projection_name' => $this->projectionName,
             'key' => $this->hasKey() ? $this->key() : null,
-            'period' => $period,
+            'period' => $this->period,
             'start_date' => $this->projectedModel->created_at->floorUnit($periodType, $quantity),
             'content' => $this->mergeProjectedContent((new $this->projectionName())->defaultContent()),
         ]);
