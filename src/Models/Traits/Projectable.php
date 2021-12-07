@@ -4,7 +4,7 @@ namespace TimothePearce\Quasar\Models\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use TimothePearce\Quasar\Jobs\ProcessProjection;
+use TimothePearce\Quasar\Jobs\ProjectProjectable;
 use TimothePearce\Quasar\Models\Projection;
 use TimothePearce\Quasar\Projector;
 
@@ -15,21 +15,11 @@ trait Projectable
      */
     public static function bootProjectable(): void
     {
-        static::created(fn(Model $model) => $model->projectModel('created'));
-        static::updating(fn(Model $model) => $model->projectModel('updating'));
-        static::updated(fn(Model $model) => $model->projectModel('updated'));
-        static::deleting(fn(Model $model) => $model->projectModel('deleting'));
-        static::deleted(fn(Model $model) => $model->projectModel('deleted'));
-    }
-
-    /**
-     * Projects the model.
-     */
-    public function projectModel(string $eventName): void
-    {
-        config('quasar.queue') ?
-            ProcessProjection::dispatch($this, $eventName) :
-            $this->bootProjectors($eventName);
+        static::created(fn(Model $model) => $model->bootProjectors('created'));
+        static::updating(fn(Model $model) => $model->bootProjectors('updating'));
+        static::updated(fn(Model $model) => $model->bootProjectors('updated'));
+        static::deleting(fn(Model $model) => $model->bootProjectors('deleting'));
+        static::deleted(fn(Model $model) => $model->bootProjectors('deleted'));
     }
 
     /**
@@ -39,7 +29,12 @@ trait Projectable
     {
         collect($this->projections)->each(
             fn(string $projection) => collect((new $projection)->periods)->each(
-                fn(string $period) => (new Projector($this, $projection, $period, $eventName))->handle())
+                function (string $period) use ($eventName, $projection) {
+                    config('quasar.queue') ?
+                        ProjectProjectable::dispatch($this, $projection, $period, $eventName) :
+                        (new Projector($this, $projection, $period, $eventName))->handle();
+                }
+            )
         );
     }
 

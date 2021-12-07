@@ -4,7 +4,7 @@ namespace TimothePearce\Quasar\Tests;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
-use TimothePearce\Quasar\Jobs\ProcessProjection;
+use TimothePearce\Quasar\Jobs\ProjectProjectable;
 use TimothePearce\Quasar\Models\Projection;
 use TimothePearce\Quasar\Tests\Models\Log;
 use TimothePearce\Quasar\Tests\Models\Message;
@@ -117,7 +117,7 @@ class ProjectableTest extends TestCase
 
         Log::factory()->create();
 
-        Queue::assertPushed(ProcessProjection::class);
+        Queue::assertPushed(ProjectProjectable::class);
     }
 
     /** @test */
@@ -128,7 +128,7 @@ class ProjectableTest extends TestCase
 
         Log::factory()->create();
 
-        Queue::assertPushedOn('named', ProcessProjection::class);
+        Queue::assertPushedOn('named', ProjectProjectable::class);
     }
 
     /** @test */
