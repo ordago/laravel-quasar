@@ -17,11 +17,11 @@ trait Projectable
      */
     public static function bootProjectable(): void
     {
-        static::created(fn(Model $model) => $model->bootProjectors('created'));
-        static::updating(fn(Model $model) => $model->bootProjectors('updating'));
-        static::updated(fn(Model $model) => $model->bootProjectors('updated'));
-        static::deleting(fn(Model $model) => $model->bootProjectors('deleting'));
-        static::deleted(fn(Model $model) => $model->bootProjectors('deleted'));
+        static::created(fn (Model $model) => $model->bootProjectors('created'));
+        static::updating(fn (Model $model) => $model->bootProjectors('updating'));
+        static::updated(fn (Model $model) => $model->bootProjectors('updated'));
+        static::deleting(fn (Model $model) => $model->bootProjectors('deleting'));
+        static::deleted(fn (Model $model) => $model->bootProjectors('deleted'));
     }
 
     /**
@@ -30,7 +30,7 @@ trait Projectable
     public function bootProjectors(string $eventName): void
     {
         collect($this->projections)->each(
-            fn(string $projection) => collect((new $projection)->periods)->each(
+            fn (string $projection) => collect((new $projection())->periods)->each(
                 function (string $period) use ($eventName, $projection) {
                     config('quasar.queue') ?
                         ProjectProjectable::dispatch($this, $projection, $period, $eventName) :
@@ -46,8 +46,7 @@ trait Projectable
     public function projections(
         string|null       $projectionName = null,
         string|array|null $periods = null,
-    ): MorphToMany
-    {
+    ): MorphToMany {
         $query = $this->morphToMany(Projection::class, 'projectable', 'quasar_projectables');
 
         if (isset($projectionName)) {
@@ -75,8 +74,7 @@ trait Projectable
     public function firstProjection(
         string|null       $projectionName = null,
         string|array|null $periods = null,
-    ): null|Projection
-    {
+    ): null|Projection {
         return $this->projections($projectionName, $periods)->first();
     }
 

@@ -26,8 +26,7 @@ class ProjectProjectable implements ShouldQueue
         protected string $projection,
         protected string $period,
         protected string $eventName
-    )
-    {
+    ) {
         $this->onQueue(config('quasar.queue_name'));
     }
 
