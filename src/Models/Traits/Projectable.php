@@ -34,7 +34,8 @@ trait Projectable
                         ProjectProjectable::dispatch($this, $projection, $period, $eventName) :
                         (new Projector($this, $projection, $period, $eventName))->handle();
                 }
-            );
+            )
+        );
     }
 
     /**
