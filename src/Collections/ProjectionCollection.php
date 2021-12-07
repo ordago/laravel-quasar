@@ -86,7 +86,7 @@ class ProjectionCollection extends Collection
     /**
      * Resolves the projector name.
      *
-     * @throws MultipleProjectionsException|EmptyProjectionCollectionException
+     * @throws MultipleProjectionsException
      */
     private function resolveProjectorName(string|null $projectorName): string
     {
