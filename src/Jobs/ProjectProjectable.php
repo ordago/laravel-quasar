@@ -9,7 +9,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Str;
 use TimothePearce\Quasar\Projector;
 
 class ProjectProjectable implements ShouldQueue
@@ -39,8 +38,7 @@ class ProjectProjectable implements ShouldQueue
      */
     public function middleware()
     {
-        [$quantity, $periodType] = Str::of($this->period)->split('/[\s]+/');
-        $key = "{$this->model->created_at->floorUnit($periodType, $quantity)}_{$this->period}_{$this->projection}";
+        $key = "{$this->model->guessProjectionStartDate($this->period)}_{$this->period}_{$this->projection}";
 
         return [new WithoutOverlapping($key)];
     }

@@ -4,6 +4,8 @@ namespace TimothePearce\Quasar\Models\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use TimothePearce\Quasar\Jobs\ProjectProjectable;
 use TimothePearce\Quasar\Models\Projection;
 use TimothePearce\Quasar\Projector;
@@ -84,5 +86,17 @@ trait Projectable
     public function setProjections(array $projections)
     {
         $this->projections = $projections;
+    }
+
+    /**
+     * Gets the projection start_date attribute.
+     */
+    public function guessProjectionStartDate(string $period): string
+    {
+        [$quantity, $periodType] = Str::of($period)->split('/[\s]+/');
+
+        return isset($this->{$this->getCreatedAtColumn()}) ?
+            $this->{$this->getCreatedAtColumn()}->floorUnit($periodType, $quantity) :
+            Carbon::today()->floorUnit($periodType, $quantity);
     }
 }

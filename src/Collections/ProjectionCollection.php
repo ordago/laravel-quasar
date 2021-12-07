@@ -23,7 +23,8 @@ class ProjectionCollection extends Collection
         Carbon      $endDate,
         string|null $projectorName = null,
         string|null $period = null,
-    ): ProjectionCollection {
+    ): ProjectionCollection
+    {
         [$projectorName, $period] = $this->resolveGuessParameters($projectorName, $period);
         [$startDate, $endDate] = $this->resolveDatesParameters($period, $startDate, $endDate);
 
@@ -111,7 +112,7 @@ class ProjectionCollection extends Collection
      *
      * @throws MultipleProjectionsException
      */
-    private function assertUniqueProjectorName()
+    private function assertUniqueProjectorName(): void
     {
         $projectorNames = $this->unique('projection_name');
 
@@ -125,7 +126,7 @@ class ProjectionCollection extends Collection
      *
      * @throws MultiplePeriodsException
      */
-    private function assertUniquePeriod()
+    private function assertUniquePeriod(): void
     {
         $periodNames = $this->unique('period');
 
@@ -136,8 +137,6 @@ class ProjectionCollection extends Collection
 
     /**
      * Guess the projector name.
-     *
-     * @throws EmptyProjectionCollectionException
      */
     private function guessProjectorName(): string
     {
@@ -164,9 +163,9 @@ class ProjectionCollection extends Collection
         while ($cursorDate->notEqualTo($endDate)):
             $cursorDate->add($periodQuantity, $periodType);
 
-        if ($cursorDate->notEqualTo($endDate)) {
-            $allProjectionsDates->push(clone $cursorDate);
-        }
+            if ($cursorDate->notEqualTo($endDate)) {
+                $allProjectionsDates->push(clone $cursorDate);
+            }
         endwhile;
 
         return $allProjectionsDates;

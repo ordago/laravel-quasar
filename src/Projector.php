@@ -13,7 +13,8 @@ class Projector
         protected string $projectionName,
         protected string $period,
         protected string $eventName
-    ) {
+    )
+    {
     }
 
     /**
@@ -21,7 +22,7 @@ class Projector
      */
     public function handle(): void
     {
-        if (! $this->hasCallableMethod()) {
+        if (!$this->hasCallableMethod()) {
             return;
         }
 
@@ -59,12 +60,10 @@ class Projector
      */
     private function parsePeriod(): void
     {
-        [$quantity, $periodType] = Str::of($this->period)->split('/[\s]+/');
-
-        $projection = $this->findProjection((int)$quantity, $periodType);
+        $projection = $this->findProjection();
 
         is_null($projection) ?
-            $this->createProjection((int)$quantity, $periodType) :
+            $this->createProjection() :
             $this->updateProjection($projection);
     }
 
@@ -84,26 +83,26 @@ class Projector
     /**
      * Finds the projection if it exists.
      */
-    private function findProjection(int $quantity, string $periodType): Projection|null
+    private function findProjection(): Projection|null
     {
         return Projection::firstWhere([
             ['projection_name', $this->projectionName],
             ['key', $this->hasKey() ? $this->key() : null],
             ['period', $this->period],
-            ['start_date', $this->projectedModel->created_at->floorUnit($periodType, $quantity)],
+            ['start_date', $this->projectedModel->guessProjectionStartDate($this->period)],
         ]);
     }
 
     /**
      * Creates the projection.
      */
-    private function createProjection(int $quantity, string $periodType): void
+    private function createProjection(): void
     {
         $this->projectedModel->projections()->create([
             'projection_name' => $this->projectionName,
             'key' => $this->hasKey() ? $this->key() : null,
             'period' => $this->period,
-            'start_date' => $this->projectedModel->created_at->floorUnit($periodType, $quantity),
+            'start_date' => $this->projectedModel->guessProjectionStartDate($this->period),
             'content' => $this->mergeProjectedContent((new $this->projectionName())->defaultContent()),
         ]);
     }

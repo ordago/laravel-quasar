@@ -4,6 +4,7 @@ namespace TimothePearce\Quasar\Tests;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use TimothePearce\Quasar\Jobs\ProjectProjectable;
 use TimothePearce\Quasar\Models\Projection;
 use TimothePearce\Quasar\Tests\Models\Log;
@@ -110,7 +111,7 @@ class ProjectableTest extends TestCase
     }
 
     /** @test */
-    public function it_dispatch_a_job_when_the_queue_config_is_enabled()
+    public function it_dispatches_a_job_when_the_queue_config_is_enabled()
     {
         Queue::fake();
         config(['quasar.queue' => true]);
@@ -121,7 +122,7 @@ class ProjectableTest extends TestCase
     }
 
     /** @test */
-    public function it_dispatch_a_job_to_the_named_queue()
+    public function it_dispatches_a_job_to_the_named_queue()
     {
         Queue::fake();
         config(['quasar.queue' => true, 'quasar.queue_name' => 'named']);
@@ -140,7 +141,7 @@ class ProjectableTest extends TestCase
     }
 
     /** @test */
-    public function it_get_the_projections_from_a_single_type()
+    public function it_gets_the_projections_from_a_single_type()
     {
         $log = $this->createModelWithProjections(Log::class, [
             SinglePeriodProjection::class,
@@ -155,7 +156,7 @@ class ProjectableTest extends TestCase
     }
 
     /** @test */
-    public function it_get_the_projections_from_a_single_type_and_period()
+    public function it_gets_the_projections_from_a_single_type_and_period()
     {
         $log = $this->createModelWithProjections(Log::class, [
             SinglePeriodProjection::class,
@@ -169,7 +170,7 @@ class ProjectableTest extends TestCase
     }
 
     /** @test */
-    public function it_get_the_projections_from_a_single_type_and_multiple_periods()
+    public function it_gets_the_projections_from_a_single_type_and_multiple_periods()
     {
         $log = $this->createModelWithProjections(Log::class, [
             SinglePeriodProjection::class,
@@ -279,12 +280,43 @@ class ProjectableTest extends TestCase
     }
 
     /** @test */
-    public function it_get_the_first_projections()
+    public function it_gets_the_first_projections()
     {
         $log = Log::factory()->create();
 
         $firstProjection = $log->firstProjection();
 
         $this->assertEquals($firstProjection->id, Projection::first()->id);
+    }
+
+    /** @test */
+    public function it_guesses_the_projection_start_date_from_his_created_at_attribute()
+    {
+        $log = Log::factory()->create(['created_at' => Carbon::yesterday()]);
+        [$quantity, $periodType] = Str::of('1 hour')->split('/[\s]+/');
+        $this->travelTo(Carbon::today());
+
+        $projectionStartDate = $log->guessProjectionStartDate('1 hour');
+
+        $this->assertEquals(
+            $projectionStartDate,
+            Carbon::yesterday()->floorUnit($periodType, $quantity)->toDateTimeString(),
+        );
+    }
+
+    /** @test */
+    public function it_resolves_the_projection_start_date_from_now_when_created_at_is_null()
+    {
+        $this->travelTo(Carbon::yesterday());
+        $log = Log::factory()->create(['created_at' => null]);
+        [$quantity, $periodType] = Str::of('1 hour')->split('/[\s]+/');
+        $this->travelTo(Carbon::today());
+
+        $projectionStartDate = $log->guessProjectionStartDate('1 hour');
+
+        $this->assertEquals(
+            $projectionStartDate,
+            Carbon::today()->floorUnit($periodType, $quantity)->toDateTimeString(),
+        );
     }
 }
