@@ -13,7 +13,8 @@ class Projector
         protected string $projectionName,
         protected string $period,
         protected string $eventName
-    ) {
+    )
+    {
     }
 
     /**
@@ -21,7 +22,7 @@ class Projector
      */
     public function handle(): void
     {
-        if (! $this->hasCallableMethod()) {
+        if (!$this->hasCallableMethod()) {
             return;
         }
 
@@ -130,6 +131,9 @@ class Projector
         $projection->save();
     }
 
+    /**
+     * Guesses the key.
+     */
     private function guessKey(): null|string
     {
         return $this->hasKey() ?
@@ -148,7 +152,7 @@ class Projector
     /**
      * The key used to query the projection.
      */
-    public function key(): bool|int|string
+    private function key(): bool|int|string
     {
         return (new $this->projectionName())->key($this->projectedModel);
     }
